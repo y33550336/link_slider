@@ -1,9 +1,9 @@
 #include <bits/stdc++.h>
 
 int main(){
-    int a = 10;
+    int c = 10;
     int b = 20;
-    int sum = a + b;
+    int sum = c + b;
     std::cout << "Sum: " << sum << std::endl;
     return 0;
 
