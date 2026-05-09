@@ -8,7 +8,7 @@ public class Slider : MonoBehaviour
     public GameObject[] players = new GameObject[2];
     private int boardSize = 7;
     private int[,] cellValues = new int[7, 7];
-    // 0は空のセル、1はスライダーがある、2はプレイヤー1の位置、3はプレイヤー2の位置
+    // 0は空のセル、1はプレイヤー1の位置、2はプレイヤー2の位置、3はスライダーの位置
     private int[,] sliderValues = new int[7, 7];
     private (int x, int y) player1Position = (0, 0);
     private (int x, int y) player2Position = (0, 0);
@@ -50,9 +50,10 @@ public class Slider : MonoBehaviour
     void MovePlayer(int dx, int dy)
     {
         if(player1Position.x + dx < 0 || player1Position.x + dx >= boardSize)return;
-        if(cellValues[player1Position.x + dx, player1Position.y] == 1)
+        if(player1Position.y + dy < 0 || player1Position.y + dy >= boardSize)return;
+        if(cellValues[player1Position.x + dx, player1Position.y + dy] == 3)
         {
-            cellValues[player1Position.x, player1Position.y] = 1;
+            cellValues[player1Position.x, player1Position.y] = 3;
             cellValues[player1Position.x - 1, player1Position.y] = 2;
             player1Position.x -= 1;
             Debug.Log("Player moved left");
@@ -63,10 +64,10 @@ public class Slider : MonoBehaviour
     void MovePlayerRight()
     {
         if(playerPositions[0].x + 1 >= boardSize)return;
-        if(cellValues[playerPositions[0].x + 1, playerPositions[0].y] == 1)
+        if(cellValues[playerPositions[0].x + 1, playerPositions[0].y] == 3)
         {
-            cellValues[playerPositions[0].x, playerPositions[0].y] = 1;
-            cellValues[playerPositions[0].x + 1, playerPositions[0].y] = 2;
+            cellValues[playerPositions[0].x, playerPositions[0].y] = 3;
+            cellValues[playerPositions[0].x + 1, playerPositions[0].y] = 1;
             playerPositions[0].x += 1;
             Debug.Log("Player moved right");
             players[0].transform.position += new Vector3(1, 0, 0);
@@ -89,7 +90,7 @@ public class Slider : MonoBehaviour
                 {
                     // セルの値を更新
                     cellValues[playerPositions[0].x, playerPositions[0].y] = 0;
-                    cellValues[playerPositions[0].x + dx, playerPositions[0].y] = 2;
+                    cellValues[playerPositions[0].x + dx, playerPositions[0].y] = 1;
                     // プレイヤーの位置を更新
                     playerPositions[0].x += dx;
                     Debug.Log("Player moved right");
@@ -106,10 +107,10 @@ public class Slider : MonoBehaviour
     void MovePlayerLeft()
     {
         if(playerPositions[0].x - 1 < 0)return;
-        if(cellValues[playerPositions[0].x - 1, playerPositions[0].y] == 1)
+        if(cellValues[playerPositions[0].x - 1, playerPositions[0].y] == 3)
         {
-            cellValues[playerPositions[0].x, playerPositions[0].y] = 1;
-            cellValues[playerPositions[0].x - 1, playerPositions[0].y] = 2;
+            cellValues[playerPositions[0].x, playerPositions[0].y] = 3;
+            cellValues[playerPositions[0].x - 1, playerPositions[0].y] = 1;
             playerPositions[0].x -= 1;
             Debug.Log("Player moved left");
             players[0].transform.position += new Vector3(-1, 0, 0);
@@ -132,7 +133,7 @@ public class Slider : MonoBehaviour
                 {
                     // セルの値を更新
                     cellValues[playerPositions[0].x, playerPositions[0].y] = 0;
-                    cellValues[playerPositions[0].x + dx, playerPositions[0].y] = 2;
+                    cellValues[playerPositions[0].x + dx, playerPositions[0].y] = 1;
                     // プレイヤーの位置を更新
                     playerPositions[0].x += dx;
                     Debug.Log("Player moved left");
@@ -149,10 +150,10 @@ public class Slider : MonoBehaviour
     void MovePlayerUp()
     {
         if(playerPositions[0].y - 1 < 0)return;
-        if(cellValues[playerPositions[0].x, playerPositions[0].y - 1] == 1)
+        if(cellValues[playerPositions[0].x, playerPositions[0].y - 1] == 3)
         {
-            cellValues[playerPositions[0].x, playerPositions[0].y] = 1;
-            cellValues[playerPositions[0].x, playerPositions[0].y - 1] = 2;
+            cellValues[playerPositions[0].x, playerPositions[0].y] = 3;
+            cellValues[playerPositions[0].x, playerPositions[0].y - 1] = 1;
             playerPositions[0].y -= 1;
             Debug.Log("Player moved up");
             players[0].transform.position += new Vector3(0, 1, 0);
@@ -175,7 +176,7 @@ public class Slider : MonoBehaviour
                 {
                     // セルの値を更新
                     cellValues[playerPositions[0].x, playerPositions[0].y] = 0;
-                    cellValues[playerPositions[0].x, playerPositions[0].y + dy] = 2;
+                    cellValues[playerPositions[0].x, playerPositions[0].y + dy] = 1;
                     // プレイヤーの位置を更新
                     playerPositions[0].y += dy;
                     Debug.Log("Player moved up");
@@ -192,10 +193,10 @@ public class Slider : MonoBehaviour
     void MovePlayerDown()
     {
         if(playerPositions[0].y + 1 >= boardSize)return;
-        if(cellValues[playerPositions[0].x, playerPositions[0].y + 1] == 1)
+        if(cellValues[playerPositions[0].x, playerPositions[0].y + 1] == 3)
         {
-            cellValues[playerPositions[0].x, playerPositions[0].y] = 1;
-            cellValues[playerPositions[0].x, playerPositions[0].y + 1] = 2;
+            cellValues[playerPositions[0].x, playerPositions[0].y] = 3;
+            cellValues[playerPositions[0].x, playerPositions[0].y + 1] = 1;
             playerPositions[0].y += 1;
             Debug.Log("Player moved down");
             players[0].transform.position += new Vector3(0, -1, 0);
@@ -218,7 +219,7 @@ public class Slider : MonoBehaviour
                 {
                     // セルの値を更新
                     cellValues[playerPositions[0].x, playerPositions[0].y] = 0;
-                    cellValues[playerPositions[0].x, playerPositions[0].y + dy] = 2;
+                    cellValues[playerPositions[0].x, playerPositions[0].y + dy] = 1;
                     // プレイヤーの位置を更新
                     playerPositions[0].y += dy;
                     Debug.Log("Player moved down");
@@ -230,8 +231,10 @@ public class Slider : MonoBehaviour
             }
             // スライダーの値を更新
             sliderValues[playerPositions[0].x, playerPositions[0].y] = currentSliderValue;
+            isPlayer1Turn = !isPlayer1Turn;
         }
     }
+    
 
     void Initialize()
     {
