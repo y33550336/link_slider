@@ -54,7 +54,7 @@ public class Slider : MonoBehaviour
         if(cellValues[player1Position.x + dx, player1Position.y + dy] == 3)
         {
             cellValues[player1Position.x, player1Position.y] = 3;
-            cellValues[player1Position.x - 1, player1Position.y] = 2;
+            cellValues[player1Position.x - 1, player1Position.y] = 1;
             player1Position.x -= 1;
             Debug.Log("Player moved left");
             players[0].transform.position += new Vector3(-1, 0, 0);
