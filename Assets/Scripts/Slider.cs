@@ -24,6 +24,11 @@ public class Slider : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(locked && Input.GetKeyDown(KeyCode.R))
+        {
+            Initialize();
+        }
+
         if(locked) return;
 
         if(Input.GetKeyDown(KeyCode.W))
@@ -42,6 +47,7 @@ public class Slider : MonoBehaviour
         {
             MovePlayer(1, 0, PlayerTurn);
         }
+    
     }
 
     void MovePlayer(int dx, int dy, int playerIndex) 
@@ -102,180 +108,6 @@ public class Slider : MonoBehaviour
         }
         PlayerTurn = (PlayerTurn + 1) % PlayerNumber;
     }
-
-/*
-    void MovePlayerRight()
-    {
-        if(playerPositions[0].x + 1 >= boardSize)return;
-        if(cellValues[playerPositions[0].x + 1, playerPositions[0].y] == 3)
-        {
-            cellValues[playerPositions[0].x, playerPositions[0].y] = 3;
-            cellValues[playerPositions[0].x + 1, playerPositions[0].y] = 1;
-            playerPositions[0].x += 1;
-            Debug.Log("Player moved right");
-            players[0].transform.position += new Vector3(1, 0, 0);
-        }
-        else if(cellValues[playerPositions[0].x + 1, playerPositions[0].y] == 0)
-        {
-            // スライダーを動かす
-            bool canMove = true;
-            int dx = 1;
-            // 今乗っているスライダーの番号を取得
-            int currentSliderValue = sliderValues[playerPositions[0].x, playerPositions[0].y];
-            // 今乗っているスライダーの値を-1にして、スライダーが動いた後に更新する
-            sliderValues[playerPositions[0].x, playerPositions[0].y] = -1;
-            while(canMove)
-            {
-                canMove = false;
-                // スライダーが動けるか確認
-                if(playerPositions[0].x + dx < 0 || playerPositions[0].x + dx >= boardSize)break;
-                if(cellValues[playerPositions[0].x + dx, playerPositions[0].y] == 0)
-                {
-                    // セルの値を更新
-                    cellValues[playerPositions[0].x, playerPositions[0].y] = 0;
-                    cellValues[playerPositions[0].x + dx, playerPositions[0].y] = 1;
-                    // プレイヤーの位置を更新
-                    playerPositions[0].x += dx;
-                    Debug.Log("Player moved right");
-                    // プレイヤーとスライダーの表示位置を更新
-                    sliders[currentSliderValue].transform.position += new Vector3(dx, 0, 0);
-                    players[0].transform.position += new Vector3(dx, 0, 0);
-                    canMove = true;
-                }
-            }
-            // スライダーの値を更新
-            sliderValues[playerPositions[0].x, playerPositions[0].y] = currentSliderValue;
-        }
-    }
-    void MovePlayerLeft()
-    {
-        if(playerPositions[0].x - 1 < 0)return;
-        if(cellValues[playerPositions[0].x - 1, playerPositions[0].y] == 3)
-        {
-            cellValues[playerPositions[0].x, playerPositions[0].y] = 3;
-            cellValues[playerPositions[0].x - 1, playerPositions[0].y] = 1;
-            playerPositions[0].x -= 1;
-            Debug.Log("Player moved left");
-            players[0].transform.position += new Vector3(-1, 0, 0);
-        }
-        else if(cellValues[playerPositions[0].x - 1, playerPositions[0].y] == 0)
-        {
-            // スライダーを動かす
-            bool canMove = true;
-            int dx = -1;
-            // 今乗っているスライダーの番号を取得
-            int currentSliderValue = sliderValues[playerPositions[0].x, playerPositions[0].y];
-            // 今乗っているスライダーの値を-1にして、スライダーが動いた後に更新する
-            sliderValues[playerPositions[0].x, playerPositions[0].y] = -1;
-            while(canMove)
-            {
-                canMove = false;
-                // スライダーが動けるか確認
-                if(playerPositions[0].x + dx < 0 || playerPositions[0].x + dx >= boardSize)break;
-                if(cellValues[playerPositions[0].x + dx, playerPositions[0].y] == 0)
-                {
-                    // セルの値を更新
-                    cellValues[playerPositions[0].x, playerPositions[0].y] = 0;
-                    cellValues[playerPositions[0].x + dx, playerPositions[0].y] = 1;
-                    // プレイヤーの位置を更新
-                    playerPositions[0].x += dx;
-                    Debug.Log("Player moved left");
-                    // プレイヤーとスライダーの表示位置を更新
-                    sliders[currentSliderValue].transform.position += new Vector3(dx, 0, 0);
-                    players[0].transform.position += new Vector3(dx, 0, 0);
-                    canMove = true;
-                }
-            }
-            // スライダーの値を更新
-            sliderValues[playerPositions[0].x, playerPositions[0].y] = currentSliderValue;
-        }
-    }
-    void MovePlayerUp()
-    {
-        if(playerPositions[0].y - 1 < 0)return;
-        if(cellValues[playerPositions[0].x, playerPositions[0].y - 1] == 3)
-        {
-            cellValues[playerPositions[0].x, playerPositions[0].y] = 3;
-            cellValues[playerPositions[0].x, playerPositions[0].y - 1] = 1;
-            playerPositions[0].y -= 1;
-            Debug.Log("Player moved up");
-            players[0].transform.position += new Vector3(0, 1, 0);
-        }
-        else if(cellValues[playerPositions[0].x, playerPositions[0].y - 1] == 0)
-        {
-            // スライダーを動かす
-            bool canMove = true;
-            int dy = -1;
-            // 今乗っているスライダーの番号を取得
-            int currentSliderValue = sliderValues[playerPositions[0].x, playerPositions[0].y];
-            // 今乗っているスライダーの値を-1にして、スライダーが動いた後に更新する
-            sliderValues[playerPositions[0].x, playerPositions[0].y] = -1;
-            while(canMove)
-            {
-                canMove = false;
-                // スライダーが動けるか確認
-                if(playerPositions[0].y + dy < 0 || playerPositions[0].y + dy >= boardSize)break;
-                if(cellValues[playerPositions[0].x, playerPositions[0].y + dy] == 0)
-                {
-                    // セルの値を更新
-                    cellValues[playerPositions[0].x, playerPositions[0].y] = 0;
-                    cellValues[playerPositions[0].x, playerPositions[0].y + dy] = 1;
-                    // プレイヤーの位置を更新
-                    playerPositions[0].y += dy;
-                    Debug.Log("Player moved up");
-                    // プレイヤーとスライダーの表示位置を更新
-                    sliders[currentSliderValue].transform.position += new Vector3(0, -dy, 0);
-                    players[0].transform.position += new Vector3(0, -dy, 0);
-                    canMove = true;
-                }
-            }
-            // スライダーの値を更新
-            sliderValues[playerPositions[0].x, playerPositions[0].y] = currentSliderValue;
-        }
-    }
-    void MovePlayerDown()
-    {
-        if(playerPositions[0].y + 1 >= boardSize)return;
-        if(cellValues[playerPositions[0].x, playerPositions[0].y + 1] == 3)
-        {
-            cellValues[playerPositions[0].x, playerPositions[0].y] = 3;
-            cellValues[playerPositions[0].x, playerPositions[0].y + 1] = 1;
-            playerPositions[0].y += 1;
-            Debug.Log("Player moved down");
-            players[0].transform.position += new Vector3(0, -1, 0);
-        }
-        else if(cellValues[playerPositions[0].x, playerPositions[0].y + 1] == 0)
-        {
-            // スライダーを動かす
-            bool canMove = true;
-            int dy = 1;
-            // 今乗っているスライダーの番号を取得
-            int currentSliderValue = sliderValues[playerPositions[0].x, playerPositions[0].y];
-            // 今乗っているスライダーの値を-1にして、スライダーが動いた後に更新する
-            sliderValues[playerPositions[0].x, playerPositions[0].y] = -1;
-            while(canMove)
-            {
-                canMove = false;
-                // スライダーが動けるか確認
-                if(playerPositions[0].y + dy < 0 || playerPositions[0].y + dy >= boardSize)break;
-                if(cellValues[playerPositions[0].x, playerPositions[0].y + dy] == 0)
-                {
-                    // セルの値を更新
-                    cellValues[playerPositions[0].x, playerPositions[0].y] = 0;
-                    cellValues[playerPositions[0].x, playerPositions[0].y + dy] = 1;
-                    // プレイヤーの位置を更新
-                    playerPositions[0].y += dy;
-                    Debug.Log("Player moved down");
-                    // プレイヤーとスライダーの表示位置を更新
-                    sliders[currentSliderValue].transform.position += new Vector3(0, -dy, 0);
-                    players[0].transform.position += new Vector3(0, -dy, 0);
-                    canMove = true;
-                }
-            }
-            // スライダーの値を更新
-            sliderValues[playerPositions[0].x, playerPositions[0].y] = currentSliderValue;
-        }
-    }*/
 
     void Initialize()
     {
