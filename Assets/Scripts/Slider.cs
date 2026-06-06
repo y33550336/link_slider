@@ -6,22 +6,23 @@ public class Slider : MonoBehaviour
     public GameObject[] cells = new GameObject[49];
     // 7*7のセルでいくつかのスライダーがある
     public GameObject[] sliders = new GameObject[12];
-    public GameObject[] players = new GameObject[2];
+    public GameObject[] players = new GameObject[4];
     private int boardSize = 7;
     private int[,] cellValues;
     // 0は空のセル、1はプレイヤー1の位置、2はプレイヤー2の位置、-1はスライダーの位置
     private int[,] sliderValues;
-    private Vector2Int[] playerPositions = new Vector2Int[2];
+    private Vector2Int[] playerPositions = new Vector2Int[4];
     int PlayerTurn = 0;
     int PlayerNumber = 2; //プレイヤーの数
     bool locked = false; //操作のロック（盤面を操作できないかどうか）
-    public TextMeshPro Text; //ターン表示用のテキスト
+    public TextMeshPro Text, TextLight; //テキスト
     public GameObject SquareObject;
 
     private int[,,] GameLog; //ゲームの状態を保存する配列、CellValuesの記録
     private int[,,] SliderGameLog; //スライダーの状態を保存する配列、SliderValuesの記録
     private int TurnIndex = 0; //GameLogのインデックス
     bool isRewinding = false; //巻き戻し中かどうか
+    public GameObject HomeButon;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -40,7 +41,8 @@ public class Slider : MonoBehaviour
         {
             isRewinding = true;
             SquareObject.SetActive(false);
-            Text.text = "Rewinding... Use Left/Right Arrow to navigate turns, X to stop rewinding";
+            Text.text = ""; Text.color = Color.black;
+            TextLight.text = "Rewinding... Use Left/Right Arrow to navigate turns, X to stop rewinding";
         }
         if (Input.GetKeyDown(KeyCode.X) && isRewinding)
         {
@@ -135,9 +137,13 @@ public class Slider : MonoBehaviour
         {
             SquareObject.SetActive(true);
             if (PlayerTurn == 0) Text.color = Color.red;
-            else Text.color = Color.blue;
+            else if (PlayerTurn == 1) Text.color = Color.blue;
+            else if (PlayerTurn == 2) Text.color = Color.green;
+            else if (PlayerTurn == 3) Text.color = Color.magenta;
             Text.text = "Player " + (PlayerTurn + 1) + " wins! Press Z to Rewind, R to Restart";
             locked = true;
+            TurnIndex = TurnIndex - 1; //巻き戻しのためにTurnIndexを-1する
+            HomeButon.SetActive(true);
         }
         PlayerTurn = (PlayerTurn + 1) % PlayerNumber;
         if (!locked) Text.text = "               Player " + (PlayerTurn + 1) + "'s turn";
@@ -225,33 +231,50 @@ public class Slider : MonoBehaviour
         }
     }
 
-    void Initialize()
+    public void Initialize()
     {
         // ボードの初期化
         boardSize = 7;
+        PlayerNumber = SceneTraveler.GetPlayerNumber();
 
         // セルの値を初期化
-        cellValues = new int[,]
+        if (PlayerNumber == 2)
         {
-            {1, -1, 0, 0, 0, -1, -1},
-            {-1, 0, 0, 0, 0, 0, -1},
-            {0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0},
-            {0, 0, 0, 0, 0, 0, 0},
-            {-1, 0, 0, 0, 0, 0, -1},
-            {-1, -1, 0, 0, 0, -1, 2}//転置していることに注意
-        };
+            cellValues = new int[,]
+            {
+                {1, -1, 0, 0, 0, -1, -1},
+                {-1, 0, 0, 0, 0, 0, -1},
+                {0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0},
+                {-1, 0, 0, 0, 0, 0, -1},
+                {-1, -1, 0, 0, 0, -1, 2}//転置していることに注意
+            };
+        }
+        else if (PlayerNumber == 4)
+        {
+            cellValues = new int[,]
+            {
+                {1, -1, 0, 0, 0, -1, 4},
+                {-1, 0, 0, 0, 0, 0, -1},
+                {0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0},
+                {-1, 0, 0, 0, 0, 0, -1},
+                {2, -1, 0, 0, 0, -1, 3}//転置していることに注意
+            };
+        }
 
         sliderValues = new int[,]
-        {
-            {0, 4, -1, -1, -1, 6, 8},
-            {1, -1, -1, -1, -1, -1, 9},
-            {-1, -1, -1, -1, -1, -1, -1},
-            {-1, -1, -1, -1, -1, -1, -1},
-            {-1, -1, -1, -1, -1, -1, -1},
-            {2, -1, -1, -1, -1, -1, 10},
-            {3, 5, -1, -1, -1, 7, 11}//転置していることに注意
-        };
+            {
+                {0, 4, -1, -1, -1, 6, 8},
+                {1, -1, -1, -1, -1, -1, 9},
+                {-1, -1, -1, -1, -1, -1, -1},
+                {-1, -1, -1, -1, -1, -1, -1},
+                {-1, -1, -1, -1, -1, -1, -1},
+                {2,-1,-1,-1,-1,-1 ,10},
+                {3 ,5 ,-1 ,-1 ,-1 ,7 ,11}//転置していることに注意
+            };
 
         sliders[0].transform.position = cells[0].transform.position + new Vector3(0, 0, -0.1f);
         sliders[1].transform.position = cells[1].transform.position + new Vector3(0, 0, -0.1f);
@@ -268,21 +291,46 @@ public class Slider : MonoBehaviour
 
 
         // プレイヤーの初期位置を設定
-        playerPositions[0] = new Vector2Int(0, 0);
-        playerPositions[1] = new Vector2Int(6, 6);
+        if (PlayerNumber == 2)
+        {
+            playerPositions[0] = new Vector2Int(0, 0);
+            playerPositions[1] = new Vector2Int(6, 6);
+        }
+        else if (PlayerNumber == 4)
+        {
+            playerPositions[0] = new Vector2Int(0, 0);
+            playerPositions[1] = new Vector2Int(6, 0);
+            playerPositions[2] = new Vector2Int(6, 6);
+            playerPositions[3] = new Vector2Int(0, 6);
+        }
 
-        players[0].transform.position = cells[0].transform.position + new Vector3(0, 0, -0.2f);
-        players[1].transform.position = cells[48].transform.position + new Vector3(0, 0, -0.2f);
+        if (PlayerNumber == 2)
+        {
+            players[0].transform.position = cells[0].transform.position + new Vector3(0, 0, -0.2f);
+            players[1].transform.position = cells[48].transform.position + new Vector3(0, 0, -0.2f);
+            players[2].SetActive(false);
+            players[3].SetActive(false);
+        }
+        else if (PlayerNumber == 4)
+        {
+            players[0].transform.position = cells[0].transform.position + new Vector3(0, 0, -0.2f);
+            players[1].transform.position = cells[6].transform.position + new Vector3(0, 0, -0.2f);
+            players[2].transform.position = cells[48].transform.position + new Vector3(0, 0, -0.2f);
+            players[3].transform.position = cells[42].transform.position + new Vector3(0, 0, -0.2f);
+        }
 
         // プレイヤー1のターンから開始
         PlayerTurn = 0;
         locked = false;
 
         Text.text = "               Player 1's turn"; Text.color = Color.black;
+        TextLight.text = ""; TextLight.color = Color.black;
         SquareObject.SetActive(false);
 
         TurnIndex = 0;
         GameLog = new int[0, boardSize, boardSize];
         SliderGameLog = new int[0, boardSize, boardSize];
+
+        HomeButon.SetActive(false);
     }
 }
