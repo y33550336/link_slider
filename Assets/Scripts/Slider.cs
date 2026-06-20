@@ -24,8 +24,11 @@ public class Slider : MonoBehaviour
     private int[,,] GameLog; //ゲームの状態を保存する配列、CellValuesの記録
     private int[,,] SliderGameLog; //スライダーの状態を保存する配列、SliderValuesの記録
     private int TurnIndex = 0; //GameLogのインデックス
+    private int PendingTurnIndex = 0; //巻き戻し中のターンインデックス
     bool isRewinding = false; //巻き戻し中かどうか
     public GameObject HomeButon;
+    bool Backable; //待ったが可能かどうか
+
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -40,12 +43,23 @@ public class Slider : MonoBehaviour
         {
             Initialize();
         }
-        if (Input.GetKeyDown(KeyCode.Z) && locked)
+        if (Input.GetKeyDown(KeyCode.Z))
         {
-            isRewinding = true;
-            SquareObject.SetActive(false);
-            Text.text = ""; Text.color = Color.black;
-            TextLight.text = "Rewinding... Use Left/Right Arrow to navigate turns, X to stop rewinding";
+            if (locked)
+            {
+                isRewinding = true;
+                SquareObject.SetActive(false);
+                Text.text = ""; Text.color = Color.black;
+                TextLight.text = "Rewinding... Use Left/Right Arrow to navigate turns, X to stop rewinding";
+            }
+            else if (Backable && TurnIndex >= PendingTurnIndex - 1) //待ち可能で、待った前のターンインデックスよりも前のターンでない場合
+            {
+                PendingTurnIndex = TurnIndex; //巻き戻し開始前のターンインデックスを保存
+                int MinTurnIndex = Mathf.Max(TurnIndex - (PlayerNumber + 1), 0);
+                Reflection(MinTurnIndex); //1ターン前の状態に戻る
+                TurnIndex = MinTurnIndex + 1; //TurnIndexを減らす
+                TextLight.text = "";
+            }
         }
         if (Input.GetKeyDown(KeyCode.X) && isRewinding)
         {
@@ -135,7 +149,8 @@ public class Slider : MonoBehaviour
 
     void EndTurn()
     {
-        Record(); //ターン終了時の状態を記録
+        if (Backable && TurnIndex >= PendingTurnIndex - 1) TextLight.text = "Press Z to undo.";
+        Record(); //現在の状態を記録
         if (playerPositions[PlayerTurn].x == boardSize / 2 && playerPositions[PlayerTurn].y == boardSize / 2)
         {
             SquareObject.SetActive(true);
@@ -144,10 +159,12 @@ public class Slider : MonoBehaviour
             else if (PlayerTurn == 2) Text.color = Color.green;
             else if (PlayerTurn == 3) Text.color = Color.magenta;
             Text.text = "Player " + (PlayerTurn + 1) + " wins! Press Z to Rewind, R to Restart";
+            TextLight.text = "";
             locked = true;
             TurnIndex = TurnIndex - 1; //巻き戻しのためにTurnIndexを-1する
             HomeButon.SetActive(true);
         }
+
         PlayerTurn = (PlayerTurn + 1) % PlayerNumber;
         if (!locked) Text.text = "               Player " + (PlayerTurn + 1) + "'s turn";
     }
@@ -239,6 +256,7 @@ public class Slider : MonoBehaviour
         // ボードの初期化
         boardSize = 7;
         PlayerNumber = SceneTraveler.GetPlayerNumber();
+        Backable = SceneTraveler.GetBackable();
 
         // セルの値を初期化
         if (PlayerNumber == 2)
@@ -333,7 +351,12 @@ public class Slider : MonoBehaviour
         TurnIndex = 0;
         GameLog = new int[0, boardSize, boardSize];
         SliderGameLog = new int[0, boardSize, boardSize];
+        Record(); //初期状態を記録
 
         HomeButon.SetActive(false);
+        if (Backable)
+        {
+            TextLight.text = "Press Z to undo.";
+        }
     }
 }
