@@ -3,6 +3,9 @@ using TMPro;
 
 public class Slider : MonoBehaviour
 {
+    [SerializeField]
+    private GrpcClient client;
+
     public GameObject[] cells = new GameObject[49];
     // 7*7のセルでいくつかのスライダーがある
     public GameObject[] sliders = new GameObject[12];
