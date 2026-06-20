@@ -7,6 +7,9 @@ namespace LinkSlider.Client
         [SerializeField]
         private GrpcClient client;
 
+        [SerializeField]
+        private string message = "Hello from GameGrpcPingButton!";
+
         public void OnClickPing()
         {
             if (client == null)
@@ -15,7 +18,7 @@ namespace LinkSlider.Client
                 return;
             }
 
-            _ = client.PingAsync("Hello from GameGrpcPingButton!");
+            _ = client.PingAsync(message);
         }
     }
 }
