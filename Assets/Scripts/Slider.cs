@@ -26,6 +26,8 @@ public class Slider : MonoBehaviour
     private int TurnIndex = 0; //GameLogのインデックス
     private int PendingTurnIndex = 0; //巻き戻し中のターンインデックス
     bool isRewinding = false; //巻き戻し中かどうか
+    bool isReplaying = false; //再プレイ中かどうか
+    int ReplayPoint = 0; //再プレイ中のGameLogのインデックス
     public GameObject HomeButon;
     bool Backable; //待ったが可能かどうか
 
@@ -43,6 +45,15 @@ public class Slider : MonoBehaviour
         {
             Initialize();
         }
+        if (locked && Input.GetKeyDown(KeyCode.R) && isRewinding && !isReplaying)
+        {
+            locked = false;
+            isReplaying = true;
+            SquareObject.SetActive(false);
+            TextLight.text = "Replaying...  Z to stop replaying";
+            ReplayPoint = TurnIndex; //巻き戻し開始前のターンインデックスを保存
+            Text.text = "               Player " + (PlayerTurn + 1) + "'s turn";
+        }
         if (Input.GetKeyDown(KeyCode.Z))
         {
             if (locked)
@@ -50,9 +61,9 @@ public class Slider : MonoBehaviour
                 isRewinding = true;
                 SquareObject.SetActive(false);
                 Text.text = ""; Text.color = Color.black;
-                TextLight.text = "Rewinding... Use Left/Right Arrow to navigate turns, X to stop rewinding";
+                TextLight.text = "Rewinding... Use Left/Right Arrow to navigate turns,R to replaying, X to stop rewinding";
             }
-            else if (Backable && TurnIndex >= PendingTurnIndex - 1) //待ち可能で、待った前のターンインデックスよりも前のターンでない場合
+            else if (!isReplaying && Backable && TurnIndex >= PendingTurnIndex - 1) //待ち可能で、待った前のターンインデックスよりも前のターンでない場合
             {
                 PendingTurnIndex = TurnIndex; //巻き戻し開始前のターンインデックスを保存
                 int MinTurnIndex = Mathf.Max(TurnIndex - (PlayerNumber + 1), 0);
@@ -60,18 +71,26 @@ public class Slider : MonoBehaviour
                 TurnIndex = MinTurnIndex + 1; //TurnIndexを減らす
                 TextLight.text = "";
             }
+            else if (isReplaying)
+            {
+                isReplaying = false;
+                locked = true;
+                Text.text = "";
+                TextLight.text = "Rewinding... Use Left/Right Arrow to navigate turns,R to replaying, X to stop rewinding";
+                Reflection(ReplayPoint); //巻き戻し開始前のターンインデックスに戻る
+            }
         }
-        if (Input.GetKeyDown(KeyCode.X) && isRewinding)
+        if (Input.GetKeyDown(KeyCode.X) && isRewinding && !isReplaying)
         {
             isRewinding = false;
             Text.text = "Pless Z to Rewind, R to Restart";
         }
-        if (isRewinding && Input.GetKeyDown(KeyCode.LeftArrow) && TurnIndex > 0)
+        if (isRewinding && Input.GetKeyDown(KeyCode.LeftArrow) && TurnIndex > 0 && !isReplaying)
         {
             Reflection(TurnIndex - 1); //1ターン前の状態に戻る
             TurnIndex = Mathf.Max(TurnIndex - 1, 0); //TurnIndexを1減らす
         }
-        if (isRewinding && Input.GetKeyDown(KeyCode.RightArrow) && TurnIndex < GameLog.GetLength(0) - 1)
+        if (isRewinding && Input.GetKeyDown(KeyCode.RightArrow) && TurnIndex < GameLog.GetLength(0) - 1 && !isReplaying)
         {
             Reflection(TurnIndex + 1); //1ターン後の状態に進む
             TurnIndex = Mathf.Min(TurnIndex + 1, GameLog.GetLength(0) - 1); //TurnIndexを1増やす
@@ -149,9 +168,9 @@ public class Slider : MonoBehaviour
 
     void EndTurn()
     {
-        if (Backable && TurnIndex >= PendingTurnIndex - 1) TextLight.text = "Press Z to undo.";
-        Record(); //現在の状態を記録
-        if (playerPositions[PlayerTurn].x == boardSize / 2 && playerPositions[PlayerTurn].y == boardSize / 2)
+        if (Backable && TurnIndex >= PendingTurnIndex - 1 && !isReplaying) TextLight.text = "Press Z to undo.";
+        if (!isReplaying) Record(); //現在の状態を記録
+        if (playerPositions[PlayerTurn].x == boardSize / 2 && playerPositions[PlayerTurn].y == boardSize / 2 && !isReplaying) //中央に到達した場合
         {
             SquareObject.SetActive(true);
             if (PlayerTurn == 0) Text.color = Color.red;
