@@ -4230,7 +4230,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 97692cd4d7729e9438eb1d62a83c2a23, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  serverAddress: http://127.0.0.1:8080
+  serverAddress:
+  - https://link-slider.trap.show/
+  - http://127.0.0.1:8080
+  - http://localhost:8080
 --- !u!4 &1291365147
 Transform:
   m_ObjectHideFlags: 0

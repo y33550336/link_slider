@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Grpc.Net.Client;
 using UnityEngine;
@@ -8,7 +9,7 @@ using LinkSlider.Client;
 public class GrpcClient : MonoBehaviour
 {
     [SerializeField]
-    private string serverAddress = "http://127.0.0.1:8080";
+    private string[] serverAddress = new string[] { "https://link-slider.trap.show/", "http://127.0.0.1:8080", "http://localhost:8080" };
 
     private GrpcChannel channel;
     private GameService.GameServiceClient client;
@@ -20,32 +21,33 @@ public class GrpcClient : MonoBehaviour
 
     private async Task InitializeClientAsync()
     {
-        var candidateAddresses = GrpcConnectionBootstrap.GetCandidateServerAddresses(serverAddress);
-
-        foreach (var candidateAddress in candidateAddresses)
         {
-            var candidateChannel = GrpcConnectionBootstrap.CreateChannel(candidateAddress);
-            var candidateClient = GameGrpcClientFactory.CreateClient(candidateChannel);
 
-            try
+            foreach (var candidateAddress in serverAddress)
             {
-                await GameGrpcPingService.PingAsync(candidateClient);
+                var candidateChannel = GrpcConnectionBootstrap.CreateChannel(candidateAddress);
+                var candidateClient = GameGrpcClientFactory.CreateClient(candidateChannel);
 
-                channel?.Dispose();
-                channel = candidateChannel;
-                client = candidateClient;
-                serverAddress = candidateAddress;
-                return;
+                try
+                {
+                    await GameGrpcPingService.PingAsync(candidateClient);
+
+                    channel?.Dispose();
+                    channel = candidateChannel;
+                    client = candidateClient;
+                    serverAddress = new string[] { candidateAddress };
+                    return;
+                }
+                catch
+                {
+                    // Ignore and try next candidate
+                    candidateChannel.Dispose();
+                    continue;
+                }
             }
-            catch
-            {
-                // Ignore and try next candidate
-                candidateChannel.Dispose();
-                continue;
-            }
+
+            Debug.LogError($"Failed to connect to gRPC server using any loopback address. Last configured address was {string.Join(", ", serverAddress)}.");
         }
-
-        Debug.LogError($"Failed to connect to gRPC server using any loopback address. Last configured address was {serverAddress}.");
     }
 
     public async Task PingAsync(string message)
